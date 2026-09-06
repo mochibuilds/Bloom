@@ -29,6 +29,9 @@ android {
 
     buildTypes {
         release {
+            // 🌸 Signed with the auto-generated debug key so CI artifacts are directly
+            // installable — no store keys, no secrets needed 💗
+            signingConfig = signingConfigs.getByName("debug")
             // 🌸 FIX: Replaced the invalid `optimization { enable = false }` block.
             // For a release build, we usually enable minification. HOWEVER, because you use
             // JNI callbacks to `onToken` in LlamaCpp.kt, R8 will strip the callback interface
