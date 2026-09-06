@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+
+    <!-- five petals, rotated around the center -->
+    <group android:pivotX="54" android:pivotY="54">
+        <path android:fillColor="#FFB4256C"
+            android:pathData="M54,30 C62,38 62,48 54,54 C46,48 46,38 54,30 Z" />
+    </group>
+    <group android:pivotX="54" android:pivotY="54" android:rotation="72">
+        <path android:fillColor="#FFB4256C"
+            android:pathData="M54,30 C62,38 62,48 54,54 C46,48 46,38 54,30 Z" />
+    </group>
+    <group android:pivotX="54" android:pivotY="54" android:rotation="144">
+        <path android:fillColor="#FFB4256C"
+            android:pathData="M54,30 C62,38 62,48 54,54 C46,48 46,38 54,30 Z" />
+    </group>
+    <group android:pivotX="54" android:pivotY="54" android:rotation="216">
+        <path android:fillColor="#FFB4256C"
+            android:pathData="M54,30 C62,38 62,48 54,54 C46,48 46,38 54,30 Z" />
+    </group>
+    <group android:pivotX="54" android:pivotY="54" android:rotation="288">
+        <path android:fillColor="#FFB4256C"
+            android:pathData="M54,30 C62,38 62,48 54,54 C46,48 46,38 54,30 Z" />
+    </group>
+
+    <!-- flower center -->
+    <path android:fillColor="#FFFFD8E4"
+        android:pathData="M54,54 m-10,0 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0" />
+
+    <!-- tiny voice waveform inside the heart of the flower 🎤 -->
+    <path android:strokeColor="#FFB4256C" android:strokeWidth="2.5"
+        android:strokeLineCap="round" android:pathData="M50,51.5 v5" />
+    <path android:strokeColor="#FFB4256C" android:strokeWidth="2.5"
+        android:strokeLineCap="round" android:pathData="M54,49.5 v9" />
+    <path android:strokeColor="#FFB4256C" android:strokeWidth="2.5"
+        android:strokeLineCap="round" android:pathData="M58,51.5 v5" />
+</vector>
