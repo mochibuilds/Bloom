@@ -1,0 +1,79 @@
+name: Reproducible build check
+
+# Builds the same commit twice in two clean, independent workspaces and fails if
+# the resulting APKs are not byte-identical. Run it manually (Actions tab →
+# "Reproducible build check" → Run workflow), e.g. after upgrading any toolchain,
+# to prove the upgrade didn't break reproducibility 🌸
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Build twice → compare SHA-256
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (build #1)
+        uses: actions/checkout@v4
+        with:
+          path: build-a
+
+      - name: Checkout (build #2)
+        uses: actions/checkout@v4
+        with:
+          path: build-b
+
+      # Same pinned toolchain as CI (see ci.yml).
+      - name: Set up JDK 25 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Install Android SDK components
+        uses: android-actions/setup-android@v3
+        with:
+          sdk-components: |
+            platforms;android-37
+            build-tools;36.0.0
+            cmake;3.22.1
+            ndk;28.2.13676358
+
+      - name: Cache Gradle (wrapper + dependencies)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/wrapper
+            ~/.gradle/caches
+          key: gradle-${{ runner.os }}-${{ hashFiles('build-a/settings.gradle.kts', 'build-a/build.gradle.kts', 'build-a/app/build.gradle.kts', 'build-a/gradle/libs.versions.toml') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      # No keystore.properties → unsigned release APK, so the output depends only
+      # on the source + toolchain (no signing timestamp to break equality).
+      - name: Build #1 (clean workspace)
+        working-directory: build-a
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Build #2 (independent clean workspace)
+        working-directory: build-b
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Compare APK hashes
+        run: |
+          apk_a=build-a/app/build/outputs/apk/release/app-release-unsigned.apk
+          apk_b=build-b/app/build/outputs/apk/release/app-release-unsigned.apk
+          hash_a=$(sha256sum "$apk_a" | awk '{print $1}')
+          hash_b=$(sha256sum "$apk_b" | awk '{print $1}')
+          echo "build #1: $hash_a"
+          echo "build #2: $hash_b"
+          if [ "$hash_a" = "$hash_b" ]; then
+            echo "::notice::✅ Reproducible — both builds are byte-identical."
+          else
+            echo "::error::❌ Builds differ. Inspect with:"
+            echo "  unzip -l $apk_a > a.txt && unzip -l $apk_b > b.txt && diff a.txt b.txt"
+            exit 1
+          fi

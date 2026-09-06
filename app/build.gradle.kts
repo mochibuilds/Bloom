@@ -16,13 +16,17 @@ val keystoreProperties = Properties().apply {
 android {
     namespace = "com.translabs.bloom"
     compileSdk = 37
+    // 🌸 Pinned so every machine (yours, CI, store build servers) compiles with the
+    // exact same toolchain → reproducible builds. Matches what's installed locally.
+    buildToolsVersion = "36.0.0"
+    ndkVersion = "28.2.13676358"
 
     defaultConfig {
         applicationId = "com.translabs.bloom"
         minSdk = 26
         targetSdk = 37
-	versionCode = 3
-	versionName = "1.0.2"
+	versionCode = 4
+	versionName = "1.0.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 

@@ -1,0 +1,91 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write # needed to create the GitHub release
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Signed release (APK + AAB)
+    runs-on: ubuntu-latest
+    env:
+      KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
+      STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Same pinned toolchain as CI (see ci.yml) → release == what CI verified.
+      - name: Set up JDK 25 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      - name: Install Android SDK components
+        uses: android-actions/setup-android@v3
+        with:
+          sdk-components: |
+            platforms;android-37
+            build-tools;36.0.0
+            cmake;3.22.1
+            ndk;28.2.13676358
+
+      - name: Verify signing secrets are set
+        if: env.KEYSTORE_B64 == '' || env.STORE_PASSWORD == '' || env.KEY_ALIAS == '' || env.KEY_PASSWORD == ''
+        run: |
+          echo "::error::Missing release signing secrets."
+          echo "Add these in Settings → Secrets and variables → Actions:"
+          echo "  RELEASE_KEYSTORE_BASE64, RELEASE_STORE_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD"
+          exit 1
+
+      # app/build.gradle.kts picks up keystore.properties automatically.
+      - name: Restore keystore & write keystore.properties
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > bloom-release.keystore
+          {
+            echo "storeFile=bloom-release.keystore"
+            echo "storePassword=$STORE_PASSWORD"
+            echo "keyAlias=$KEY_ALIAS"
+            echo "keyPassword=$KEY_PASSWORD"
+          } > keystore.properties
+
+      - name: Cache Gradle (wrapper + dependencies)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/wrapper
+            ~/.gradle/caches
+          key: gradle-${{ runner.os }}-${{ hashFiles('settings.gradle.kts', 'build.gradle.kts', 'app/build.gradle.kts', 'gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      - name: Build signed release APK + AAB
+        run: ./gradlew assembleRelease bundleRelease --stacktrace
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bloom-release-${{ github.ref_name }}
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab
+          if-no-files-found: error
+
+      - name: Publish GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/bundle/release/*.aab

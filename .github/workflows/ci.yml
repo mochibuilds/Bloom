@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & test (pinned toolchain)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # JDK 25 matches gradle/gradle-daemon-jvm.properties (toolchainVersion=25),
+      # so Gradle uses this exact JVM and never fetches a toolchain from the network.
+      - name: Set up JDK 25 (Temurin)
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "25"
+
+      # The same SDK components as a local dev machine, pinned to exact versions:
+      #   platforms;android-37  → compileSdk = 37
+      #   build-tools;36.0.0    → pinned via buildToolsVersion in app/build.gradle.kts
+      #   cmake;3.22.1          → pinned in app/build.gradle.kts (externalNativeBuild)
+      #   ndk;28.2.13676358     → pinned via ndkVersion in app/build.gradle.kts
+      - name: Install Android SDK components
+        uses: android-actions/setup-android@v3
+        with:
+          sdk-components: |
+            platforms;android-37
+            build-tools;36.0.0
+            cmake;3.22.1
+            ndk;28.2.13676358
+
+      # The Gradle wrapper distribution is verified against the SHA-256 in
+      # gradle/wrapper/gradle-wrapper.properties, so this cache can't be poisoned.
+      - name: Cache Gradle (wrapper + dependencies)
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/wrapper
+            ~/.gradle/caches
+          key: gradle-${{ runner.os }}-${{ hashFiles('settings.gradle.kts', 'build.gradle.kts', 'app/build.gradle.kts', 'gradle/libs.versions.toml', 'gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-${{ runner.os }}-
+
+      # No keystore.properties on CI → the release APK is built unsigned, which is
+      # exactly what we want for a reproducible build (inputs only, no key).
+      - name: Build & test
+        run: ./gradlew assembleRelease assembleDebug testDebugUnitTest --stacktrace
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: bloom-apks-${{ github.sha }}
+          path: |
+            app/build/outputs/apk/release/*.apk
+            app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
