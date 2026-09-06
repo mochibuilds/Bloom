@@ -103,18 +103,18 @@ training and shared by SLPs & the trans voice community:
 
 1. clone the repo:
    ```bash
-   git clone https://github.com/Mochi/Bloom.git
+   git clone https://github.com/mochibuilds/Bloom.git
    ```
 2. open in Android Studio and sync gradle.
 3. the first build fetches & compiles **llama.cpp** automatically via CMake
    (needs `git` + internet, and the Android NDK).
-4. run on any device or emulator with **API 26+**.
+4. run on any **64-bit** device or emulator with **API 26+**.
 
 > the AI storyteller model (491 MB) is downloaded **inside the app**
 > (stories tab → *download*), over Wi‑Fi only. without it, bloom gracefully
 > falls back to the built-in storybook 📚
 
-## ️ project structure
+## project structure
 
 ```text
 app/src/main/java/com/translabs/bloom/
