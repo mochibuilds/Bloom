@@ -1,0 +1,17 @@
+bloom is a gentle voice-practice companion that helps you explore and train your voice with live pitch feedback, cozy reading material, an optional on-device AI storyteller, a gentle tutorial and soft daily reminders. It was made with love for everyone finding their voice - especially trans and gender-diverse folks.
+
+* Live pitch practice: a from-scratch YIN pitch detector listens to your microphone and draws your voice as a blooming line, with a "bloom zone" (165-220 Hz) showing when you are in your target range.
+* Beautiful progress: sessions, voiced minutes and a gentle streak that forgives rest days.
+* Story time: curated reading passages designed with voice-training phonetics in mind, plus an optional on-device AI storyteller (Qwen2.5-0.5B-Instruct) that writes tiny wholesome stories just for you. AI stories may contain errors - read gently!
+* Voice guide: a gentle tutorial on how your larynx and resonance work, with safe, strain-free exercises.
+* Self-care: daily practice reminders that survive reboots, plus voice-health rules.
+
+Privacy:
+
+* Audio is analyzed in memory and thrown away immediately - never recorded, never saved.
+* Progress lives in a private file on your device only.
+* The AI storyteller runs fully on-device (CPU only); your stories never touch a server.
+* The 491 MB model downloads only over Wi-Fi, and only if you ask for it.
+
+trans people exist, trans people deserve rights, and trans youth deserve to bloom.
+

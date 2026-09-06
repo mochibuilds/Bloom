@@ -1,0 +1,7 @@
+🌸 first bloom release!
+* live pitch practice with the bloom zone
+* progress tracking with gentle streaks
+* on-device AI storyteller (Qwen2.5-0.5B-Instruct)
+* voice guide with safe exercises
+* daily reminders that survive reboots
+
