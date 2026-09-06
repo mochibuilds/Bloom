@@ -53,6 +53,18 @@ organizations like [The Trevor Project](https://www.thetrevorproject.org),
 - 💐 **gratitude** — a little page that says thank you to the people (and
   models) who made bloom possible.
 
+## 📥 download
+
+bloom isn't on any app store — every build is published straight from
+[github actions](https://github.com/mochibuilds/Bloom/actions):
+
+1. open the [actions tab](https://github.com/mochibuilds/Bloom/actions) and pick the latest green run (a **Release** run for tagged versions, or any CI run).
+2. scroll to **Artifacts** at the bottom of the run and download it — it's a zip containing `app-release.apk` (+ an AAB if you want one).
+3. unzip and install `app-release.apk` on your device: **API 26+**, 64-bit only 💗
+
+> android will ask you to allow *install unknown apps* for your browser or file manager — that's normal for sideloaded apks.
+> note: builds are unsigned, so if you installed an older signed version of bloom, uninstall it first (android blocks signature changes).
+
 ## 🔐 privacy first
 
 - 🎙️ audio is analyzed **in memory and thrown away immediately** — never
