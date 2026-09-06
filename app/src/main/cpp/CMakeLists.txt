@@ -11,10 +11,12 @@ set(LLAMA_BUILD_SERVER OFF CACHE BOOL "" FORCE)
 
 include(FetchContent)
 
-# Automatically download llama.cpp from GitHub
+# Download llama.cpp from GitHub, pinned to the exact commit this project is
+# verified against — reproducible on any machine (incl. store build servers) 💗
 FetchContent_Declare(
     llama_cpp
-    SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../llama.cpp
+    GIT_REPOSITORY https://github.com/ggerganov/llama.cpp.git
+    GIT_TAG 61141f1487e63d9b22aec193131253bb2ea0800c
 )
 FetchContent_MakeAvailable(llama_cpp)
 
