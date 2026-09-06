@@ -14,23 +14,6 @@ reading material, an optional on-device AI storyteller, a gentle voice
 tutorial, and soft daily reminders. made with love for everyone finding
 their voice — especially trans & gender-diverse folks 💗
 
-## 📸 screenshots
-
-<table>
-<tr>
-<td><img width="240" height="534" alt="screenshot 1" src="https://github.com/user-attachments/assets/b3885423-3831-482b-8a52-4cca820620f3" /></td>
-<td><img width="240" height="534" alt="screenshot 2" src="https://github.com/user-attachments/assets/d7345757-b701-4aa6-82d5-bac7e8f6f1e2" /></td>
-<td><img width="240" height="534" alt="screenshot 3" src="https://github.com/user-attachments/assets/2b972e21-1045-4f8e-8d47-ec3e75027910" /></td>
-</tr>
-<tr>
-<td><img width="240" height="534" alt="screenshot 4" src="https://github.com/user-attachments/assets/383d5880-91ed-4adf-877d-6212482b303b" /></td>
-<td><img width="240" height="534" alt="screenshot 5" src="https://github.com/user-attachments/assets/a724df4b-e853-4b3a-886e-97a5d5080a95" /></td>
-<td><img width="240" height="534" alt="screenshot 6" src="https://github.com/user-attachments/assets/170a83cc-11db-4e23-b7e6-9a9091e2bb30" /></td>
-</tr>
-</table>
-
----
-
 ## 🏳️‍⚧️ first things first
 
 **trans people exist, and trans people deserve rights.** full stop.
