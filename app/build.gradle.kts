@@ -6,12 +6,13 @@ plugins {
 }
 
 // Release signing - reads keystore.properties (gitignored, never committed).
-// If the file is missing, release builds fall back to debug signing so the
+// If the file is missing (e.g., on CI), release builds are unsigned so the
 // project stays buildable for anyone without your key.
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties().apply {
     if (keystorePropertiesFile.exists()) load(keystorePropertiesFile.inputStream())
 }
+val hasReleaseKeystore = keystoreProperties.getProperty("storeFile", "").isNotBlank()
 
 android {
     namespace = "com.translabs.bloom"
@@ -38,17 +39,19 @@ android {
     }
 
     signingConfigs {
-        create("bloomRelease") {
-            storeFile = rootProject.file(keystoreProperties.getProperty("storeFile", ""))
-            storePassword = keystoreProperties.getProperty("storePassword", "")
-            keyAlias = keystoreProperties.getProperty("keyAlias", "")
-            keyPassword = keystoreProperties.getProperty("keyPassword", "")
+        if (hasReleaseKeystore) {
+            create("bloomRelease") {
+                storeFile = rootProject.file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword", "")
+                keyAlias = keystoreProperties.getProperty("keyAlias", "")
+                keyPassword = keystoreProperties.getProperty("keyPassword", "")
+            }
         }
     }
 
     buildTypes {
         release {
-            if (keystorePropertiesFile.exists()) {
+            if (hasReleaseKeystore) {
                 signingConfig = signingConfigs.getByName("bloomRelease")
             }
             // 🌸 FIX: Replaced the invalid `optimization { enable = false }` block.
