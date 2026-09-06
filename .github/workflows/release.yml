@@ -14,19 +14,13 @@ concurrency:
 
 jobs:
   release:
-    name: Signed release (APK + AAB)
+    name: Build release (APK + AAB)
     runs-on: ubuntu-latest
-    env:
-      KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
-      STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
-      KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
-      KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Same pinned toolchain as CI (see ci.yml) → release == what CI verified.
+      # Same pinned toolchain as CI (see ci.yml).
       - name: Set up JDK 25 (Temurin)
         uses: actions/setup-java@v4
         with:
@@ -42,40 +36,6 @@ jobs:
             cmake;3.22.1
             ndk;28.2.13676358
 
-      - name: Verify signing secrets are set
-        if: env.KEYSTORE_B64 == '' || env.STORE_PASSWORD == '' || env.KEY_ALIAS == '' || env.KEY_PASSWORD == ''
-        run: |
-          echo "::error::Missing release signing secrets."
-          echo "Add these in Settings → Secrets and variables → Actions:"
-          echo "  RELEASE_KEYSTORE_BASE64, RELEASE_STORE_PASSWORD, RELEASE_KEY_ALIAS, RELEASE_KEY_PASSWORD"
-          exit 1
-
-      # app/build.gradle.kts picks up keystore.properties automatically.
-      - name: Restore keystore & write keystore.properties
-        run: |
-          # Strip any whitespace (newlines, CRLF, line wrapping) from the pasted secret
-          clean=$(printf '%s' "$KEYSTORE_B64" | tr -d '[:space:]')
-          echo "base64 length after cleanup: ${#clean} (your current keystore should give 3528)"
-          if [ "${#clean}" -lt 100 ]; then
-            echo "::error::RELEASE_KEYSTORE_BASE64 is too short — the paste was probably truncated. Re-copy the FULL output of: base64 -w 0 bloom-release.keystore"
-            exit 1
-          fi
-          bad=$(printf '%s' "$clean" | grep -o '[^A-Za-z0-9+/=]' | sort -u | tr '\n' ' ' || true)
-          if [ -n "$bad" ]; then
-            echo "::error::RELEASE_KEYSTORE_BASE64 contains non-base64 characters: [$bad] — re-paste the raw output of: base64 -w 0 bloom-release.keystore"
-            exit 1
-          fi
-          printf '%s' "$clean" | base64 -d > bloom-release.keystore
-          test -s bloom-release.keystore || { echo "::error::Decoded keystore is empty."; exit 1; }
-          keytool -list -keystore bloom-release.keystore -storepass "$STORE_PASSWORD" >/dev/null \
-            || { echo "::error::Keystore invalid or store password wrong — check RELEASE_STORE_PASSWORD."; exit 1; }
-          {
-            echo "storeFile=bloom-release.keystore"
-            echo "storePassword=$STORE_PASSWORD"
-            echo "keyAlias=$KEY_ALIAS"
-            echo "keyPassword=$KEY_PASSWORD"
-          } > keystore.properties
-
       - name: Cache Gradle (wrapper + dependencies)
         uses: actions/cache@v4
         with:
@@ -86,7 +46,7 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
-      - name: Build signed release APK + AAB
+      - name: Build release APK + AAB (unsigned)
         run: ./gradlew assembleRelease bundleRelease --stacktrace
 
       # The download source for builds: open this run → Artifacts tab.
