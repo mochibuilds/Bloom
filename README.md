@@ -128,14 +128,12 @@ github actions keeps every build on the exact same toolchain as your machine:
 | llama.cpp | commit `61141f1` | `CMakeLists.txt` (FetchContent) |
 
 - **CI** — runs on every push to `main` + pull request: builds release & debug APKs, runs unit tests, uploads the APKs as artifacts.
-- **Release** — runs when you tag a commit with `v*` (or manually): signs with your keystore from github secrets and publishes an APK + AAB to GitHub Releases. bump `versionCode`/`versionName` in `app/build.gradle.kts` before tagging.
+- **Release** — runs when you tag a commit with `v*` (or manually): signs with your keystore from github secrets; download the signed APK + AAB from the run's **Artifacts** tab (kept for 1 year). bump `versionCode`/`versionName` in `app/build.gradle.kts` before tagging.
   one-time secret setup:
   ```bash
   base64 -w 0 bloom-release.keystore   # macOS: base64 -i bloom-release.keystore | tr -d '\n'
   ```
   then add `RELEASE_KEYSTORE_BASE64` (the output), `RELEASE_STORE_PASSWORD`, `RELEASE_KEY_ALIAS` and `RELEASE_KEY_PASSWORD` under Settings → Secrets and variables → Actions. the keystore itself never lives in the repo 💗
-- **Reproducible build check** — manual workflow (Actions tab): builds the same commit twice in two clean workspaces and fails unless both APKs are byte-identical. run it after any toolchain upgrade to prove nothing drifted 🌸
-
 ## project structure
 
 ```text

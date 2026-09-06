@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write # needed to create the GitHub release
+  contents: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -53,7 +53,11 @@ jobs:
       # app/build.gradle.kts picks up keystore.properties automatically.
       - name: Restore keystore & write keystore.properties
         run: |
-          echo "$KEYSTORE_B64" | base64 -d > bloom-release.keystore
+          # Strip any whitespace (newlines, CRLF, line wrapping) from the pasted secret
+          echo "$KEYSTORE_B64" | tr -d '[:space:]' | base64 -d > bloom-release.keystore
+          test -s bloom-release.keystore || { echo "::error::Decoded keystore is empty — check the RELEASE_KEYSTORE_BASE64 secret."; exit 1; }
+          keytool -list -keystore bloom-release.keystore -storepass "$STORE_PASSWORD" >/dev/null \
+            || { echo "::error::Keystore invalid or store password wrong."; exit 1; }
           {
             echo "storeFile=bloom-release.keystore"
             echo "storePassword=$STORE_PASSWORD"
@@ -74,6 +78,8 @@ jobs:
       - name: Build signed release APK + AAB
         run: ./gradlew assembleRelease bundleRelease --stacktrace
 
+      # The download source for builds: open this run → Artifacts tab.
+      # Kept for a year (the default retention is only 90 days).
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -82,10 +88,4 @@ jobs:
             app/build/outputs/apk/release/*.apk
             app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
-
-      - name: Publish GitHub release
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            app/build/outputs/apk/release/*.apk
-            app/build/outputs/bundle/release/*.aab
+          retention-days: 365
