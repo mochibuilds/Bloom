@@ -153,7 +153,7 @@ app/src/main/cpp/
 bloom grew with a little help from:
 
 - **Mochi** — for the love, the vibes & for believing in bloom 💗
-- **Qwen3.8-Max, Qwen3.8-27B** — every bug we squashed together ✨
+- **Qwen3.8-Max, Qwen3.8-27B** — for every bug we squashed together ✨
 - **Femtanyl** — for the music 🎶
 - **Qwen2.5-0.5B-Instruct** — the tiny on-device storyteller 🤖
 - **the trans voice community** — the SLPs, coaches & friends whose shared
