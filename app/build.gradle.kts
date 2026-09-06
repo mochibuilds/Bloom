@@ -1,6 +1,16 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+}
+
+// Release signing - reads keystore.properties (gitignored, never committed).
+// If the file is missing, release builds fall back to debug signing so the
+// project stays buildable for anyone without your key.
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) load(keystorePropertiesFile.inputStream())
 }
 
 android {
@@ -23,8 +33,20 @@ android {
             abiFilters += listOf("arm64-v8a", "x86_64")        }
     }
 
+    signingConfigs {
+        create("bloomRelease") {
+            storeFile = rootProject.file(keystoreProperties.getProperty("storeFile", ""))
+            storePassword = keystoreProperties.getProperty("storePassword", "")
+            keyAlias = keystoreProperties.getProperty("keyAlias", "")
+            keyPassword = keystoreProperties.getProperty("keyPassword", "")
+        }
+    }
+
     buildTypes {
         release {
+            if (keystorePropertiesFile.exists()) {
+                signingConfig = signingConfigs.getByName("bloomRelease")
+            }
             // 🌸 FIX: Replaced the invalid `optimization { enable = false }` block.
             // For a release build, we usually enable minification. HOWEVER, because you use
             // JNI callbacks to `onToken` in LlamaCpp.kt, R8 will strip the callback interface
