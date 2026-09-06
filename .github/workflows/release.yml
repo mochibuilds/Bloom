@@ -54,10 +54,21 @@ jobs:
       - name: Restore keystore & write keystore.properties
         run: |
           # Strip any whitespace (newlines, CRLF, line wrapping) from the pasted secret
-          echo "$KEYSTORE_B64" | tr -d '[:space:]' | base64 -d > bloom-release.keystore
-          test -s bloom-release.keystore || { echo "::error::Decoded keystore is empty — check the RELEASE_KEYSTORE_BASE64 secret."; exit 1; }
+          clean=$(printf '%s' "$KEYSTORE_B64" | tr -d '[:space:]')
+          echo "base64 length after cleanup: ${#clean} (your current keystore should give 3528)"
+          if [ "${#clean}" -lt 100 ]; then
+            echo "::error::RELEASE_KEYSTORE_BASE64 is too short — the paste was probably truncated. Re-copy the FULL output of: base64 -w 0 bloom-release.keystore"
+            exit 1
+          fi
+          bad=$(printf '%s' "$clean" | grep -o '[^A-Za-z0-9+/=]' | sort -u | tr '\n' ' ' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::RELEASE_KEYSTORE_BASE64 contains non-base64 characters: [$bad] — re-paste the raw output of: base64 -w 0 bloom-release.keystore"
+            exit 1
+          fi
+          printf '%s' "$clean" | base64 -d > bloom-release.keystore
+          test -s bloom-release.keystore || { echo "::error::Decoded keystore is empty."; exit 1; }
           keytool -list -keystore bloom-release.keystore -storepass "$STORE_PASSWORD" >/dev/null \
-            || { echo "::error::Keystore invalid or store password wrong."; exit 1; }
+            || { echo "::error::Keystore invalid or store password wrong — check RELEASE_STORE_PASSWORD."; exit 1; }
           {
             echo "storeFile=bloom-release.keystore"
             echo "storePassword=$STORE_PASSWORD"
