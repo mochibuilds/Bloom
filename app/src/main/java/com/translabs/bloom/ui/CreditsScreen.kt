@@ -20,9 +20,14 @@ private data class Credit(val emoji: String, val name: String, val thanks: Strin
 
 private val credits = listOf(
     Credit("🌸", "Mochi", "for the love, the vibes & for believing in bloom 💗"),
-    Credit("🤖", "Qwen3.8-Max", "for the brains — every bug we squashed together ✨"),
-    Credit("🎵", "Femtanyl", "for the music while making this app 🎶"),
-    Credit("🧠", "Qwen2.5-0.5B-Instruct", "the tiny on-device storyteller living in your phone 🤖"),
+    Credit("🤖", "Qwen3.8-Max, Qwen3.8-27B", "for every bug we squashed together ✨"),
+    Credit("🎵", "Femtanyl", "for the music 🎶"),
+    Credit("🧠", "Qwen2.5-0.5B-Instruct", "the tiny on-device storyteller 🤖"),
+    Credit(
+        "🏳️‍⚧️",
+        "the trans voice community",
+        "the SLPs, coaches & friends whose shared knowledge made the guide & passages possible 💗",
+    ),
 )
 
 @Composable
